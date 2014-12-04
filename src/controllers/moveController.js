@@ -1,7 +1,7 @@
 define([
-
+  'constants'
 ], function (
-
+  constants
 ) {
   'use strict';
 
@@ -46,6 +46,16 @@ define([
         neighbour = this.playGround.tiles.findNeighbour(tile, direction);
         neighbour.move(oppositeDirection[direction]);
         tile.move(direction);
+
+        if (this.playGround.checkMoveCombo()) {
+
+        } else {
+          setTimeout(function () {
+            neighbour.move(direction);
+            tile.move(oppositeDirection[direction]);
+          }, constants.theme.animationDuration * 1000);
+        }
+
       }
     }
   };

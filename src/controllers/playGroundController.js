@@ -38,6 +38,12 @@ define([
         playGroundView.on('move', this.movement.handler.bind(this.movement));
 
         this.rootEl.append(playGroundView.render(this.tiles).el);
+      },
+      initialComboCheck: function () {
+
+      },
+      checkMoveCombo: function () {
+
       }
     };
 
