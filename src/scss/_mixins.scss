@@ -1,0 +1,20 @@
+@mixin transition ($props) {
+  -webkit-transition: $props;
+  -moz-transition: $props;
+  -o-transition: $props;
+  transition: $props;
+}
+
+@mixin transition-property ($prop) {
+  -webkit-transition-property: $prop;
+  -moz-transition-property: $prop;
+  -o-transition-property: $prop;
+  transition-property: $prop;
+}
+
+@mixin transition-timing-function ($prop) {
+  -webkit-transition-timing-function: $prop;
+  -moz-transition-timing-function: $prop;
+  -o-transition-timing-function: $prop;
+  transition-timing-function: $prop;
+}

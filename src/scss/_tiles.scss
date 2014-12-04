@@ -1,0 +1,21 @@
+.tile {
+  @include transition-property(all);
+  @include transition-timing-function(ease-out);
+  background-color: #999;
+  cursor: move;
+  position: absolute;
+  z-index: 0;
+
+  &.tile-type-1 { background-color: #B0BF1A; }
+  &.tile-type-2 { background-color: #7CB9E8; }
+  &.tile-type-3 { background-color: #C9FFE5; }
+  &.tile-type-4 { background-color: #B284BE; }
+  &.tile-type-5 { background-color: #00308F; }
+  &.tile-type-6 { background-color: #AF002A; }
+  &.tile-type-7 { background-color: #FF7E00; }
+  &.tile-type-8 { background-color: #F19CBB; }
+  &.tile-type-9 { background-color: #3B7A57; }
+  &.tile-type-10 { background-color: #FF033E; }
+  &.tile-type-11 { background-color: #008000; }
+  &.tile-type-12 { background-color: #FDEE00; }
+}
