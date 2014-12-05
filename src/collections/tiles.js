@@ -10,23 +10,54 @@ define([
     return Backbone.Collection.extend({
       model: Tile,
       create: function (options) {
-        var size = options.size,
-            typeAmount = options.typeAmount,
-            tile;
+        var typeAmount = options.typeAmount,
+            tile,
+            size = options.size;
 
         for (var i = 0; i < size; i++) {
           for (var j = 0; j < size; j++) {
             tile = new Tile({
               x: i,
               y: j,
-              type: Tile.getRandomType(typeAmount)
+              type: this._getRandomType(typeAmount, i, j)
             });
 
             this.add(tile);
           }
         }
-
         return this;
+      },
+      _getRandomType: function (typeAmount, i, j) {
+        var type = _.random(1, typeAmount);
+        this._tempPlayGround = this._tempPlayGround || {};
+        this._tempPlayGround[i] = this._tempPlayGround[i] || {};
+
+        // horizontal simple combo (3x)
+        if (!_.isEmpty(this._tempPlayGround[i])) {
+          if (this._tempPlayGround[i][j - 2] === type && this._tempPlayGround[i][j - 1] === type) {
+            return this._getRandomType(typeAmount, i, j);
+          }
+        }
+
+        // vertical simple combo
+        if (this._tempPlayGround[i - 1] && this._tempPlayGround[i - 2]) {
+          if (this._tempPlayGround[i - 1][j] === type && this._tempPlayGround[i - 2][j] === type) {
+            return this._getRandomType(typeAmount, i, j);
+          }
+        }
+
+        // push to collector
+        this._tempPlayGround[i][j] = type;
+
+        // cleanup
+        if (!_.isEmpty(this._tempPlayGround[i - 3])) {
+          delete this._tempPlayGround[i - 3];
+        }
+
+        return type;
+      },
+      validType: function () {
+
       },
       findNeighbour: function (tile, direction) {
         var neighbour,
@@ -44,7 +75,7 @@ define([
             };
 
         neighbour = this.find(function (neighbour) {
-          return neighbour.get('x') === dx[direction] && neighbour.get('y') === dy[direction]
+          return neighbour.get('x') === dx[direction] && neighbour.get('y') === dy[direction];
         });
 
         return neighbour;

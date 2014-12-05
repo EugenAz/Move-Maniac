@@ -39,9 +39,5 @@ define([
       }
     });
 
-    TileModel.getRandomType = function (typeAmount) {
-      return _.random(1, typeAmount);
-    }
-
     return TileModel;
 });
