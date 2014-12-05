@@ -29,30 +29,30 @@ define([
       },
       _getRandomType: function (typeAmount, i, j) {
         var type = _.random(1, typeAmount);
-        this._tempPlayGround = this._tempPlayGround || {};
-        this._tempPlayGround[i] = this._tempPlayGround[i] || {};
+        // this._tempPlayGround = this._tempPlayGround || {};
+        // this._tempPlayGround[i] = this._tempPlayGround[i] || {};
 
-        // horizontal simple combo (3x)
-        if (!_.isEmpty(this._tempPlayGround[i])) {
-          if (this._tempPlayGround[i][j - 2] === type && this._tempPlayGround[i][j - 1] === type) {
-            return this._getRandomType(typeAmount, i, j);
-          }
-        }
+        // // horizontal simple combo (3x)
+        // if (!_.isEmpty(this._tempPlayGround[i])) {
+        //   if (this._tempPlayGround[i][j - 2] === type && this._tempPlayGround[i][j - 1] === type) {
+        //     return this._getRandomType(typeAmount, i, j);
+        //   }
+        // }
 
-        // vertical simple combo
-        if (this._tempPlayGround[i - 1] && this._tempPlayGround[i - 2]) {
-          if (this._tempPlayGround[i - 1][j] === type && this._tempPlayGround[i - 2][j] === type) {
-            return this._getRandomType(typeAmount, i, j);
-          }
-        }
+        // // vertical simple combo
+        // if (this._tempPlayGround[i - 1] && this._tempPlayGround[i - 2]) {
+        //   if (this._tempPlayGround[i - 1][j] === type && this._tempPlayGround[i - 2][j] === type) {
+        //     return this._getRandomType(typeAmount, i, j);
+        //   }
+        // }
 
-        // push to collector
-        this._tempPlayGround[i][j] = type;
+        // // push to collector
+        // this._tempPlayGround[i][j] = type;
 
-        // cleanup
-        if (!_.isEmpty(this._tempPlayGround[i - 3])) {
-          delete this._tempPlayGround[i - 3];
-        }
+        // // cleanup
+        // if (!_.isEmpty(this._tempPlayGround[i - 3])) {
+        //   delete this._tempPlayGround[i - 3];
+        // }
 
         return type;
       },

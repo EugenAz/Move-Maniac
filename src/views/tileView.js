@@ -40,7 +40,7 @@ define([
           .css({
             width: constants.theme.tileSizePx,
             height: constants.theme.tileSizePx,
-            transform: 'translate(' + this.coordToSize(x) + 'px, ' + this.coordToSize(y) + 'px)'
+            transform: 'translate(' + this.coordToSize(y) + 'px, ' + this.coordToSize(x) + 'px)'
           });
       return this;
     },
