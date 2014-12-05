@@ -56,9 +56,6 @@ define([
 
         return type;
       },
-      validType: function () {
-
-      },
       findNeighbour: function (tile, direction) {
         var neighbour,
             dx = {
