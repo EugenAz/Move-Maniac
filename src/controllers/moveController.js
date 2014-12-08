@@ -80,7 +80,7 @@ define([
       delete this.tiles;
     },
     _getCombos: function () {
-      var combos = [],
+      var angleCombos = [],
           horizontalCombos = [],
           verticalCombos = [],
           horizontalTempCombo = new Combo(),
@@ -101,6 +101,8 @@ define([
           });
         }
       }
+
+      angleCombos = this._getAngleCombos(verticalCombos, horizontalCombos);
 
       return {
         verticalCombos: verticalCombos,
@@ -129,6 +131,9 @@ define([
           options.tempCombo.flush(i, j, this.tiles[i][j]);
         }
       }
+    },
+    _getAngleCombos: function (verticalCombos, horizontalCombos) {
+
     },
     checkMoveCombo: function () {},
     removeComboTiles: function () {
