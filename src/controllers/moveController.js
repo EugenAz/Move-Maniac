@@ -133,6 +133,9 @@ define([
       }
     },
     _getAngleCombos: function (verticalCombos, horizontalCombos) {
+      // 1. list of tile coords(ids) to delete
+      // 2. list of combos + qty of tiles in each combo to count score
+      // 3. coord(type) of key elem of combo in case of getting a super combo (>= 4 || cross) to replace with super tile
       horizontalCombos.forEach(function (combo) {
         // combo.
       });
