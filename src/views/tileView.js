@@ -11,10 +11,10 @@ define([
     className: 'tile',
     events: {
       // http://xavi.co/articles/trouble-with-touch-events-jquery
-      'mousedown': 'onDragInit',
-      'touchstart': 'onDragInit',
-      'mouseup': 'stopDragging',
-      'touchend': 'stopDragging'
+      'mousedown': '_onDragInit',
+      'touchstart': '_onDragInit',
+      'mouseup': '_stopDragging',
+      'touchend': '_stopDragging'
     },
     initX: 0,
     initY: 0,
@@ -23,7 +23,7 @@ define([
 
       this.model.on('change:x change:y', this.render.bind(this));
     },
-    coordToSize: function (coord) {
+    _coordToSize: function (coord) {
       return coord * (constants.theme.tileSizePx + constants.theme.tileMarginPx);
     },
     render: function () {
@@ -40,12 +40,12 @@ define([
           .css({
             width: constants.theme.tileSizePx,
             height: constants.theme.tileSizePx,
-            transform: 'translate(' + this.coordToSize(y) + 'px, ' + this.coordToSize(x) + 'px)'
+            transform: 'translate(' + this._coordToSize(x) + 'px, ' + this._coordToSize(y) + 'px)'
           });
       return this;
     },
-    onDragInit: function (e) {
-      var dragHandler = _.bind(this.onDrag, this),
+    _onDragInit: function (e) {
+      var dragHandler = _.bind(this._onDrag, this),
           moveEvent;
 
       this.undelegateEvents();
@@ -63,12 +63,12 @@ define([
               trailing: true
             }));
     },
-    onDrag: function (e) {
+    _onDrag: function (e) {
       var x = e.clientX ? e.clientX : e.originalEvent.touches[0].pageX,
           y = e.clientY ? e.clientY : e.originalEvent.touches[0].pageY;
 
       if (x !== this.initX || y !== this.initY) {
-        this.stopDragging();
+        this._stopDragging();
 
         this.trigger('move', {
           model: this.model,
@@ -81,7 +81,7 @@ define([
         });
       }
     },
-    stopDragging: function () {
+    _stopDragging: function () {
       this.$el.off(this.touchable ? 'touchmove' : 'mousemove');
     }
   });

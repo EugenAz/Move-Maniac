@@ -1,7 +1,9 @@
 define([
-  'constants'
+  'constants',
+  'libs/combo'
 ], function (
-  constants
+  constants,
+  Combo
 ) {
   'use strict';
 
@@ -61,49 +63,72 @@ define([
       }
     },
     wholeFieldComboCheck: function () {
-      var hCombos = [],
-          vCombos = [];
-
+      var combos = [];
       this.tiles = {};
 
       this.playGround.tiles.models.forEach(function (tile) {
-        this.tiles[tile.get('x')] = this.tiles[tile.get('x')] || {};
-        this.tiles[tile.get('x')][tile.get('y')] = {
+        this.tiles[tile.get('y')] = this.tiles[tile.get('y')] || {};
+        this.tiles[tile.get('y')][tile.get('x')] = {
           id: tile.cid,
           type: tile.get('type')
         };
       }.bind(this));
 
-      hCombos = this._getHCombos();
+      combos = this._getCombos();
+      // TODO: do something with combos
 
-      // for (var i = 0; i < this.playGround.size; i++) {
-      //   // horizontal  combos
-      //   for (var j = 0; j < this.playGround.size; j++) {
-
-      //   }
-      // }
+      delete this.tiles;
     },
-    _getHCombos: function () {
+    _getCombos: function () {
       var combos = [],
-          tempCombo = [],
+          horizontalCombos = [],
+          verticalCombos = [],
+          horizontalTempCombo = new Combo(),
+          verticalTempCombo = new Combo(),
           i, j;
 
       for (i = 0; i < this.playGround.size; i++) {
         for (j = 0; j < this.playGround.size; j++) {
-          if (_.isEmpty(tempCombo) || tempCombo[tempCombo.length - 1] && tempCombo[tempCombo.length - 1].type === this.tiles[i][j].type) {
-            tempCombo.push(this.tiles[i][j]);
-          } else if (!_.isEmpty(tempCombo)) {
-            if (tempCombo.length >= 3) {
-              combos.push(tempCombo);
-            }
-            tempCombo = [];
-          }
+          this._getLineComboStep(i, j, {
+            combos: horizontalCombos,
+            tempCombo: horizontalTempCombo,
+          });
+
+          this._getLineComboStep(i, j, {
+            combos: verticalCombos,
+            tempCombo: verticalTempCombo,
+            reverse: true
+          });
         }
       }
-      debugger;
-    },
-    _getRowCombos: function () {
 
+      return {
+        verticalCombos: verticalCombos,
+        horizontalCombos: horizontalCombos
+      };
+    },
+    _getLineComboStep: function (i, j, options) {
+      var ij;
+
+      if (i !== 0 && j === 0) {
+        if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.get());
+        options.tempCombo.flush();
+      }
+
+      if (options.reverse) {
+        ij = i; i = j; j = ij;
+      }
+
+      if (options.tempCombo.isEmpty()) {
+        options.tempCombo.push(i, j, this.tiles[i][j]);
+      } else {
+        if (options.tempCombo.lastTile().type === this.tiles[i][j].type) {
+          options.tempCombo.push(i, j, this.tiles[i][j]);
+        } else {
+          if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.get());
+          options.tempCombo.flush(i, j, this.tiles[i][j]);
+        }
+      }
     },
     checkMoveCombo: function () {},
     removeComboTiles: function () {
