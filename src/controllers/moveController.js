@@ -133,7 +133,13 @@ define([
       }
     },
     _getAngleCombos: function (verticalCombos, horizontalCombos) {
-
+      horizontalCombos.forEach(function (combo) {
+        // combo.
+      });
+      // horiz
+      // [{3: {2: {}, 3: {}, 4: {}}}]
+      // vert
+      // [{1: {1: {}}, 2: {1: {}}, 3: {1: {}}}, {1: {2: {}}, 2: {2: {}}, 3: {2: {}}}]
     },
     checkMoveCombo: function () {},
     removeComboTiles: function () {

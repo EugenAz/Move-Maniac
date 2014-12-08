@@ -12,7 +12,7 @@ define([
     GameController.prototype.startGame = function () {
       var gameRound = new GameRoundController({
         size: 5,
-        typeAmount: 4
+        typeAmount: 3
       });
 
       var gameView = new GameView();
