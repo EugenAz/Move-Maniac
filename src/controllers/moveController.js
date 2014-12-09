@@ -52,10 +52,6 @@ define([
         tile.move(direction);
 
         if (combos = this.wholeFieldComboCheck()) { // TODO: checkMoveCombo
-          // TODO: do something with combos
-          // 1. list of tile coords(ids) to delete
-          // 2. list of combos + qty of tiles in each combo to count score
-          // 3. coord(type) of key elem of combo in case of getting a super combo (>= 4 || cross) to replace with super tile
           removedTiles = this.removeComboTiles(combos);
           this.fillInPlayGround(removedTiles);
         } else {
@@ -112,10 +108,6 @@ define([
       return verticalCombos
               .concat(horizontalCombos).
               concat(crossCombos);
-        // verticalCombos: verticalCombos,
-        // horizontalCombos: horizontalCombos,
-        // crossCombos: crossCombos
-      // };
     },
     _getLineComboStep: function (i, j, options) {
       var ij;
@@ -170,18 +162,23 @@ define([
     },
     checkMoveCombo: function () {},
     removeComboTiles: function (combos) {
-      var tile;
+      var tile,
+          emptyCoords = [];
 
       combos.forEach(function (combo) {
         for (var key in combo.coords) {
+          emptyCoords.push(key);
           tile = this.playGround.tiles.get(combo.coords[key]);
           this.playGround.tiles.remove(tile);
           tile.destroy();
         }
       }.bind(this));
+
+      return emptyCoords;
     },
     fillInPlayGround: function (removedTiles) {
-      console.log('fill in play ground with new tiles');
+      // TODO: pull down the tiles above.
+      // this.playGround.tiles.createN(removedTiles);
     }
   };
 

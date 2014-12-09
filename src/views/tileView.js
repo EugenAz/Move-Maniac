@@ -20,7 +20,6 @@ define([
     initY: 0,
     initialize: function () {
       this.touchable = 'ontouchstart' in window;
-
       this.model.on('change:x change:y', this.render.bind(this));
       this.model.on('destroy', this._onDestroy.bind(this));
     },
