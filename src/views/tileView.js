@@ -22,6 +22,7 @@ define([
       this.touchable = 'ontouchstart' in window;
 
       this.model.on('change:x change:y', this.render.bind(this));
+      this.model.on('destroy', this._onDestroy.bind(this));
     },
     _coordToSize: function (coord) {
       return coord * (constants.theme.tileSizePx + constants.theme.tileMarginPx);
@@ -43,6 +44,9 @@ define([
             transform: 'translate(' + this._coordToSize(x) + 'px, ' + this._coordToSize(y) + 'px)'
           });
       return this;
+    },
+    _onDestroy: function (e) {
+      this.remove();
     },
     _onDragInit: function (e) {
       var dragHandler = _.bind(this._onDrag, this),

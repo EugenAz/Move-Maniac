@@ -39,7 +39,8 @@ define([
           direction,
           canMove,
           neighbour,
-          removedTiles;
+          removedTiles,
+          combos;
 
       tile = options.model;
       direction = this.getDragDirection(options.coords.X0 - options.coords.X1, options.coords.Y0 - options.coords.Y1);
@@ -50,8 +51,12 @@ define([
         neighbour.move(oppositeDirection[direction]);
         tile.move(direction);
 
-        if (this.wholeFieldComboCheck()) { // TODO: checkMoveCombo
-          removedTiles = this.removeComboTiles();
+        if (combos = this.wholeFieldComboCheck()) { // TODO: checkMoveCombo
+          // TODO: do something with combos
+          // 1. list of tile coords(ids) to delete
+          // 2. list of combos + qty of tiles in each combo to count score
+          // 3. coord(type) of key elem of combo in case of getting a super combo (>= 4 || cross) to replace with super tile
+          removedTiles = this.removeComboTiles(combos);
           this.fillInPlayGround(removedTiles);
         } else {
           setTimeout(function () {
@@ -75,12 +80,12 @@ define([
       }.bind(this));
 
       combos = this._getCombos();
-      // TODO: do something with combos
 
       delete this.tiles;
+      return combos.length > 0 ? combos : false;
     },
     _getCombos: function () {
-      var angleCombos = [],
+      var crossCombos = [],
           horizontalCombos = [],
           verticalCombos = [],
           horizontalTempCombo = new Combo(),
@@ -102,22 +107,30 @@ define([
         }
       }
 
-      angleCombos = this._getAngleCombos(verticalCombos, horizontalCombos);
+      crossCombos = this._getCrossCombos(verticalCombos, horizontalCombos);
 
-      return {
-        verticalCombos: verticalCombos,
-        horizontalCombos: horizontalCombos
-      };
+      return verticalCombos
+              .concat(horizontalCombos).
+              concat(crossCombos);
+        // verticalCombos: verticalCombos,
+        // horizontalCombos: horizontalCombos,
+        // crossCombos: crossCombos
+      // };
     },
     _getLineComboStep: function (i, j, options) {
       var ij;
 
-      if (i !== 0 && j === 0) {
-        if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.get());
+      function _tryToCollectAndFlush () {
+        if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.export());
         options.tempCombo.flush();
       }
 
-      if (options.reverse) {
+      if (i !== 0 && j === 0) {
+        if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.export());
+        options.tempCombo.flush();
+      }
+
+      if (options.reverse && i !== j) {
         ij = i; i = j; j = ij;
       }
 
@@ -127,26 +140,45 @@ define([
         if (options.tempCombo.lastTile().type === this.tiles[i][j].type) {
           options.tempCombo.push(i, j, this.tiles[i][j]);
         } else {
-          if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.get());
+          if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.export());
           options.tempCombo.flush(i, j, this.tiles[i][j]);
         }
       }
+
+      if (i === this.playGround.size - 1 && j === this.playGround.size - 1) {
+        if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.export());
+        options.tempCombo.flush();
+      }
     },
-    _getAngleCombos: function (verticalCombos, horizontalCombos) {
-      // 1. list of tile coords(ids) to delete
-      // 2. list of combos + qty of tiles in each combo to count score
-      // 3. coord(type) of key elem of combo in case of getting a super combo (>= 4 || cross) to replace with super tile
-      horizontalCombos.forEach(function (combo) {
-        // combo.
+    _getCrossCombos: function (verticalCombos, horizontalCombos) {
+      var crossCombos = [];
+      horizontalCombos.forEach(function (hCombo, hIndex) {
+        for (var hCoord in hCombo.coords) {
+          verticalCombos.forEach(function (vCombo, vIndex) {
+            for (var vCoord in vCombo.coords) {
+              if (hCoord === vCoord) {
+                crossCombos.push(Combo.mergeCombos(hCombo, vCombo));
+                horizontalCombos.splice(hIndex, 1);
+                verticalCombos.splice(vIndex, 1);
+              }
+            };
+          });
+        }
       });
-      // horiz
-      // [{3: {2: {}, 3: {}, 4: {}}}]
-      // vert
-      // [{1: {1: {}}, 2: {1: {}}, 3: {1: {}}}, {1: {2: {}}, 2: {2: {}}, 3: {2: {}}}]
+
+      return crossCombos;
     },
     checkMoveCombo: function () {},
-    removeComboTiles: function () {
-      console.log('remove tiles from combo');
+    removeComboTiles: function (combos) {
+      var tile;
+
+      combos.forEach(function (combo) {
+        for (var key in combo.coords) {
+          tile = this.playGround.tiles.get(combo.coords[key]);
+          this.playGround.tiles.remove(tile);
+          tile.destroy();
+        }
+      }.bind(this));
     },
     fillInPlayGround: function (removedTiles) {
       console.log('fill in play ground with new tiles');
