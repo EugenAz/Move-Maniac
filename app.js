@@ -24,8 +24,7 @@ require.config({
 });
 
 /*
-  TODO:
-  1. sync models and collections with localStorage
+  TODO: sync models and collections with localStorage
 */
 
 require([

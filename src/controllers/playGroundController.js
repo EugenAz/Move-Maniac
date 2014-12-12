@@ -13,8 +13,6 @@ define([
 ) {
     'use strict';
 
-    // TODO: eject alllogic from tileView to here maybe using MoveController
-
     function PlayGroundController (options) {
       this.size = options.size;
       this.typeAmount = options.typeAmount;

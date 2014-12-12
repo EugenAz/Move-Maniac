@@ -16,7 +16,6 @@ define([
     initialize: function (options) {
       this.size = options.size;
       this.typeAmount = options.typeAmount;
-      // TODO event triggers for tiles changing destroying adding...
     },
     render: function (tiles) {
       var tileView;
