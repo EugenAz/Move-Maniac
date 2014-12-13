@@ -42,18 +42,22 @@ define([
           removedTiles,
           combos;
 
+      this.tiles = this.playGround.tiles;
+
       tile = options.model;
       direction = this.getDragDirection(options.coords.X0 - options.coords.X1, options.coords.Y0 - options.coords.Y1);
       canMove = tile.canMove(direction, this.playGround.size);
 
       if (canMove) {
-        neighbour = this.playGround.tiles.findNeighbour(tile, direction);
+        neighbour = this.tiles.findNeighbour(tile, direction);
         neighbour.move(oppositeDirection[direction]);
         tile.move(direction);
 
         if (combos = this.wholeFieldComboCheck()) { // TODO: checkMoveCombo
-          removedTiles = this.removeComboTiles(combos);
-          this.fillInPlayGround(removedTiles);
+          removedTiles = this.tiles.removeSelected(combos);
+          this.tiles.createSubstitutions(removedTiles);
+          this.tiles.getIntoPositions(removedTiles);
+          // this.fillInPlayGround(removedTiles);
         } else {
           setTimeout(function () {
             neighbour.move(direction);
@@ -65,11 +69,11 @@ define([
     },
     wholeFieldComboCheck: function () {
       var combos = [];
-      this.tiles = {};
+      this.tempTiles = {};
 
-      this.playGround.tiles.models.forEach(function (tile) {
-        this.tiles[tile.get('y')] = this.tiles[tile.get('y')] || {};
-        this.tiles[tile.get('y')][tile.get('x')] = {
+      this.tiles.models.forEach(function (tile) {
+        this.tempTiles[tile.get('y')] = this.tempTiles[tile.get('y')] || {};
+        this.tempTiles[tile.get('y')][tile.get('x')] = {
           id: tile.cid,
           type: tile.get('type')
         };
@@ -77,7 +81,7 @@ define([
 
       combos = this._getCombos();
 
-      delete this.tiles;
+      delete this.tempTiles;
       return combos.length > 0 ? combos : false;
     },
     _getCombos: function () {
@@ -127,13 +131,13 @@ define([
       }
 
       if (options.tempCombo.isEmpty()) {
-        options.tempCombo.push(i, j, this.tiles[i][j]);
+        options.tempCombo.push(i, j, this.tempTiles[i][j]);
       } else {
-        if (options.tempCombo.lastTile().type === this.tiles[i][j].type) {
-          options.tempCombo.push(i, j, this.tiles[i][j]);
+        if (options.tempCombo.lastTile().type === this.tempTiles[i][j].type) {
+          options.tempCombo.push(i, j, this.tempTiles[i][j]);
         } else {
           if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.export());
-          options.tempCombo.flush(i, j, this.tiles[i][j]);
+          options.tempCombo.flush(i, j, this.tempTiles[i][j]);
         }
       }
 
@@ -161,24 +165,9 @@ define([
       return crossCombos;
     },
     checkMoveCombo: function () {},
-    removeComboTiles: function (combos) {
-      var tile,
-          emptyCoords = [];
-
-      combos.forEach(function (combo) {
-        for (var key in combo.coords) {
-          emptyCoords.push(key);
-          tile = this.playGround.tiles.get(combo.coords[key]);
-          this.playGround.tiles.remove(tile);
-          tile.destroy();
-        }
-      }.bind(this));
-
-      return emptyCoords;
-    },
     fillInPlayGround: function (removedTiles) {
       // TODO: pull down the tiles above.
-      // this.playGround.tiles.createN(removedTiles);
+      // this.tiles.createN(removedTiles);
     }
   };
 

@@ -104,6 +104,37 @@ define([
         });
 
         return neighbour;
+      },
+      removeSelected: function (combos) {
+        var tile,
+            emptyCoords = [];
+
+        combos.forEach(function (combo) {
+          for (var key in combo.coords) {
+            emptyCoords.push(key);
+            tile = this.get(combo.coords[key]);
+            this.remove(tile);
+            tile.destroy();
+          }
+        }.bind(this));
+
+        return emptyCoords;
+      },
+      createSubstitutions: function (removedTiles) {
+        var colIterator = {};
+        removedTiles.forEach(function (coords) {
+          var x = parseInt(coords.split(',')[1]);
+          colIterator[x] = !!colIterator[x] ? colIterator[x] - 1 : -1;
+
+          this._createTile({
+            x: x,
+            y: colIterator[x],
+            type: this._getRandomType()
+          });
+        }.bind(this));
+      },
+      getIntoPositions: function () {
+
       }
     });
 });
