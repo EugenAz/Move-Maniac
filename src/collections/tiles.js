@@ -99,10 +99,7 @@ define([
               'left': tile.get('y')
             };
 
-        neighbour = this.find(function (neighbour) {
-          return neighbour.get('x') === dx[direction] && neighbour.get('y') === dy[direction];
-        });
-
+        neighbour = this.getTileByCoords(dx[direction], dy[direction]);
         return neighbour;
       },
       removeSelected: function (combos) {
@@ -133,8 +130,39 @@ define([
           });
         }.bind(this));
       },
-      getIntoPositions: function () {
+      getIntoPositions: function (removedTiles) {
+        var gapLength = 0,
+            firstGapInACol,
+            tile;
 
+        removedTiles.sort().reverse();
+        removedTiles.temp = {};
+        removedTiles.forEach(function (coords) {
+          var x, y;
+
+          coords = coords.split(',');
+          y = parseInt(coords[0]);
+          x = parseInt(coords[1]);
+
+          removedTiles.temp[x] = removedTiles.temp[x] || [];
+          removedTiles.temp[x].push(y);
+        });
+
+        for (var col in removedTiles.temp) {
+          col = parseInt(col);
+          gapLength = removedTiles.temp[col].length;
+          firstGapInACol = removedTiles.temp[col][removedTiles.temp[col].length - 1];
+
+          for (var i = 1; i <= gapLength + firstGapInACol; i++) {
+            tile = this.getTileByCoords(col, firstGapInACol - i);
+            tile.moveTo(col, tile.get('y') + gapLength);
+          }
+        }
+      },
+      getTileByCoords: function (x, y) {
+        return this.find(function (tile) {
+          return tile.get('x') === x && tile.get('y') === y;
+        });
       }
     });
 });

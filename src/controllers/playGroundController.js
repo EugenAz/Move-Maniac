@@ -40,7 +40,7 @@ define([
         this.rootEl.append(this.playGroundView.render(this.tiles).el);
       },
       _onTileAdd: function () {
-        this.rootEl.empty();
+        this.playGroundView.$el.empty();
         this.rootEl.append(this.playGroundView.render(this.tiles).el);
       }
     };

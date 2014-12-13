@@ -19,9 +19,8 @@ define([
     },
     render: function (tiles) {
       var tileView;
-      _(['width', 'height']).each(function (prop) {
-        this.$el.css(prop, (this.size * constants.theme.tileSizePx) + ((this.size - 1) * constants.theme.tileMarginPx));
-      }.bind(this));
+
+      this._setPlayGroundSize();
 
       _(tiles.models).each(function (tile) {
         tileView = new TileView({
@@ -42,6 +41,15 @@ define([
       }).attach();
 
       return this;
+    },
+    _setPlayGroundSize: function () {
+      if (! this.sizeIsSet) {
+        _(['width', 'height']).each(function (prop) {
+          this.$el.css(prop, (this.size * constants.theme.tileSizePx) + ((this.size - 1) * constants.theme.tileMarginPx));
+        }.bind(this));
+
+        this.sizeIsSet = true;
+      }
     }
   });
 });

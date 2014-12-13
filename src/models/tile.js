@@ -36,6 +36,14 @@ define([
             this.set('x', this.get('x') - 1);
             break;
         }
+      },
+      moveTo: function (x, y) {
+        this.set({
+          x: x,
+          y: y
+        });
+
+        return this;
       }
     });
 

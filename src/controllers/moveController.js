@@ -57,7 +57,6 @@ define([
           removedTiles = this.tiles.removeSelected(combos);
           this.tiles.createSubstitutions(removedTiles);
           this.tiles.getIntoPositions(removedTiles);
-          // this.fillInPlayGround(removedTiles);
         } else {
           setTimeout(function () {
             neighbour.move(direction);
@@ -164,11 +163,7 @@ define([
 
       return crossCombos;
     },
-    checkMoveCombo: function () {},
-    fillInPlayGround: function (removedTiles) {
-      // TODO: pull down the tiles above.
-      // this.tiles.createN(removedTiles);
-    }
+    checkMoveCombo: function () {}
   };
 
   return MoveController;
