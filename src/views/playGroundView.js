@@ -18,20 +18,10 @@ define([
       this.typeAmount = options.typeAmount;
     },
     render: function (tiles) {
-      var tileView;
-
       this._setPlayGroundSize();
 
       _(tiles.models).each(function (tile) {
-        tileView = new TileView({
-          model: tile
-        });
-
-        tileView.on('move', function (options) {
-          this.trigger('move', options);
-        }.bind(this));
-
-        this.$el.append(tileView.render().el);
+        this.addTile(tile);
       }.bind(this));
 
       jss.createStyleSheet({
@@ -41,6 +31,19 @@ define([
       }).attach();
 
       return this;
+    },
+    addTile: function (tile) {
+      var tileView;
+
+      tileView = new TileView({
+        model: tile
+      });
+
+      tileView.on('move', function (options) {
+        this.trigger('move', options);
+      }.bind(this));
+
+      this.$el.append(tileView.render().el);
     },
     _setPlayGroundSize: function () {
       if (! this.sizeIsSet) {

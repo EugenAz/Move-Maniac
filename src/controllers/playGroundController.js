@@ -27,7 +27,6 @@ define([
             typeAmount: this.typeAmount
           };
 
-
         this.tiles = new Tiles(),
         this.tiles.create(options);
 
@@ -35,13 +34,12 @@ define([
 
         this.playGroundView.on('move', this.movement.handler.bind(this.movement));
 
-        this.tiles.on('add', this._onTileAdd.bind(this));
+        this.tiles.on('add', this.playGroundView.addTile.bind(this.playGroundView));
 
         this.rootEl.append(this.playGroundView.render(this.tiles).el);
       },
-      _onTileAdd: function () {
-        this.playGroundView.$el.empty();
-        this.rootEl.append(this.playGroundView.render(this.tiles).el);
+      _onTileAdd: function (tile, tiles, options) {
+        this.playGroundView.addTile(tile);
       }
     };
 

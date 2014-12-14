@@ -130,9 +130,9 @@ define([
           });
         }.bind(this));
       },
-      getIntoPositions: function (removedTiles) {
+      dropTilesIntoPositions: function (removedTiles) {
         var gapLength = 0,
-            firstGapInACol,
+            firstGapYInACol,
             tile;
 
         removedTiles.sort().reverse();
@@ -151,10 +151,10 @@ define([
         for (var col in removedTiles.temp) {
           col = parseInt(col);
           gapLength = removedTiles.temp[col].length;
-          firstGapInACol = removedTiles.temp[col][removedTiles.temp[col].length - 1];
+          firstGapYInACol = removedTiles.temp[col][removedTiles.temp[col].length - 1];
 
-          for (var i = 1; i <= gapLength + firstGapInACol; i++) {
-            tile = this.getTileByCoords(col, firstGapInACol - i);
+          for (var i = 1; i <= gapLength + firstGapYInACol; i++) {
+            tile = this.getTileByCoords(col, firstGapYInACol - i);
             tile.moveTo(col, tile.get('y') + gapLength);
           }
         }

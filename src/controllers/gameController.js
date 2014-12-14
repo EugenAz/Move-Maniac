@@ -11,7 +11,7 @@ define([
 
     GameController.prototype.startGame = function () {
       var gameRound = new GameRoundController({
-        size: 5,
+        size: 4,
         typeAmount: 3
       });
 

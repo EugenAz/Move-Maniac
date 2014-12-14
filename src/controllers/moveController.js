@@ -54,9 +54,11 @@ define([
         tile.move(direction);
 
         if (combos = this.wholeFieldComboCheck()) { // TODO: checkMoveCombo
-          removedTiles = this.tiles.removeSelected(combos);
-          this.tiles.createSubstitutions(removedTiles);
-          this.tiles.getIntoPositions(removedTiles);
+          do {
+            removedTiles = this.tiles.removeSelected(combos);
+            this.tiles.createSubstitutions(removedTiles);
+            this.tiles.dropTilesIntoPositions(removedTiles);
+          } while (combos = this.wholeFieldComboCheck());
         } else {
           setTimeout(function () {
             neighbour.move(direction);
@@ -68,11 +70,11 @@ define([
     },
     wholeFieldComboCheck: function () {
       var combos = [];
-      this.tempTiles = {};
+      this._tempTiles = {};
 
       this.tiles.models.forEach(function (tile) {
-        this.tempTiles[tile.get('y')] = this.tempTiles[tile.get('y')] || {};
-        this.tempTiles[tile.get('y')][tile.get('x')] = {
+        this._tempTiles[tile.get('y')] = this._tempTiles[tile.get('y')] || {};
+        this._tempTiles[tile.get('y')][tile.get('x')] = {
           id: tile.cid,
           type: tile.get('type')
         };
@@ -80,7 +82,7 @@ define([
 
       combos = this._getCombos();
 
-      delete this.tempTiles;
+      delete this._tempTiles;
       return combos.length > 0 ? combos : false;
     },
     _getCombos: function () {
@@ -109,8 +111,8 @@ define([
       crossCombos = this._getCrossCombos(verticalCombos, horizontalCombos);
 
       return verticalCombos
-              .concat(horizontalCombos).
-              concat(crossCombos);
+              .concat(horizontalCombos)
+              .concat(crossCombos);
     },
     _getLineComboStep: function (i, j, options) {
       var ij;
@@ -130,13 +132,13 @@ define([
       }
 
       if (options.tempCombo.isEmpty()) {
-        options.tempCombo.push(i, j, this.tempTiles[i][j]);
+        options.tempCombo.push(i, j, this._tempTiles[i][j]);
       } else {
-        if (options.tempCombo.lastTile().type === this.tempTiles[i][j].type) {
-          options.tempCombo.push(i, j, this.tempTiles[i][j]);
+        if (options.tempCombo.lastTile().type === this._tempTiles[i][j].type) {
+          options.tempCombo.push(i, j, this._tempTiles[i][j]);
         } else {
           if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.export());
-          options.tempCombo.flush(i, j, this.tempTiles[i][j]);
+          options.tempCombo.flush(i, j, this._tempTiles[i][j]);
         }
       }
 
