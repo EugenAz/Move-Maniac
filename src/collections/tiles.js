@@ -10,8 +10,6 @@ define([
     return Backbone.Collection.extend({
       model: Tile,
       create: function (options) {
-        var tile;
-
         this.typeAmount = options.typeAmount;
         this.size = options.size;
 
@@ -27,8 +25,7 @@ define([
         return this;
       },
       createN: function (coords) {
-        var tile,
-            split,
+        var split,
             x, y;
 
         coords.forEach(function (coord) {
@@ -131,8 +128,9 @@ define([
         }.bind(this));
       },
       dropTilesIntoPositions: function (removedTiles) {
-        var gapLength = 0,
-            firstGapYInACol,
+        var i,
+            rowCounter,
+            maxColGapY,
             tile;
 
         removedTiles.sort().reverse();
@@ -150,12 +148,20 @@ define([
 
         for (var col in removedTiles.temp) {
           col = parseInt(col);
-          gapLength = removedTiles.temp[col].length;
-          firstGapYInACol = removedTiles.temp[col][removedTiles.temp[col].length - 1];
+          maxColGapY = removedTiles.temp[col][0];
 
-          for (var i = 1; i <= gapLength + firstGapYInACol; i++) {
-            tile = this.getTileByCoords(col, firstGapYInACol - i);
-            tile.moveTo(col, tile.get('y') + gapLength);
+          rowCounter = 0;
+          i = 1;
+
+          while (maxColGapY >= 0) {
+            if ( (tile = this.getTileByCoords(col, maxColGapY - i)) ) {
+              tile.moveTo(col, tile.get('y') + i);
+              maxColGapY--;
+              i = 1;
+              rowCounter++;
+            } else {
+              i++;
+            }
           }
         }
       },

@@ -55,6 +55,7 @@ define([
 
         if (combos = this.wholeFieldComboCheck()) { // TODO: checkMoveCombo
           do {
+            // TODO: Add delay for animation
             removedTiles = this.tiles.removeSelected(combos);
             this.tiles.createSubstitutions(removedTiles);
             this.tiles.dropTilesIntoPositions(removedTiles);
@@ -148,6 +149,7 @@ define([
       }
     },
     _getCrossCombos: function (verticalCombos, horizontalCombos) {
+      // TODO: find all matching coords in combos
       var crossCombos = [];
       horizontalCombos.forEach(function (hCombo, hIndex) {
         for (var hCoord in hCombo.coords) {
