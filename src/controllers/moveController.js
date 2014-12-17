@@ -148,24 +148,37 @@ define([
         options.tempCombo.flush();
       }
     },
-    _getCrossCombos: function (verticalCombos, horizontalCombos) {
+    _getCrossCombos: function (verticalCombos, horizontalCombos, faa) {
       // TODO: find all matching coords in combos
+      if (faa === 'faa') {
+        this._getCrossCombos.recurred = true;
+      }
       var crossCombos = [];
       horizontalCombos.forEach(function (hCombo, hIndex) {
         for (var hCoord in hCombo.coords) {
+
           verticalCombos.forEach(function (vCombo, vIndex) {
-            for (var vCoord in vCombo.coords) {
-              if (hCoord === vCoord) {
+            var coords = Object.keys(vCombo.coords);
+
+            if (~coords.indexOf(hCoord)) {
+              if (crossCombos.length && ~Object.keys(crossCombos[crossCombos.length - 1].coords).indexOf(hCoord)) {
+                crossCombos[crossCombos.length - 1] = Combo.mergeCombos(crossCombos[crossCombos.length - 1], verticalCombos[vIndex]);
+                verticalCombos.splice(vIndex, 1);
+              } else {
                 crossCombos.push(Combo.mergeCombos(hCombo, vCombo));
                 horizontalCombos.splice(hIndex, 1);
                 verticalCombos.splice(vIndex, 1);
               }
-            };
+            }
           });
         }
       });
 
-      return crossCombos;
+      if (this._getCrossCombos.recurred) {
+        return crossCombos;
+      } else {
+        return crossCombos.concat(this._getCrossCombos(crossCombos, horizontalCombos, 'faa'));
+      }
     },
     checkMoveCombo: function () {}
   };
