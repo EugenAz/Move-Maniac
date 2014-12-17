@@ -21,16 +21,16 @@ define([
     move: function (direction) {
       switch (direction) {
         case 'up':
-          this.set('y', this.get('y') - 1);
+          this.moveTo(this.get('x'), this.get('y') - 1);
           break;
         case 'right':
-          this.set('x', this.get('x') + 1);
+          this.moveTo(this.get('x') + 1, this.get('y'));
           break;
         case 'down':
-          this.set('y', this.get('y') + 1);
+          this.moveTo(this.get('x'), this.get('y') + 1);
           break;
         case 'left':
-          this.set('x', this.get('x') - 1);
+          this.moveTo(this.get('x') - 1, this.get('y'));
           break;
       }
     },
