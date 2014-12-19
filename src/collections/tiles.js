@@ -10,18 +10,41 @@ define([
     return Backbone.Collection.extend({
       model: Tile,
       create: function (options) {
-        this.typeAmount = options.typeAmount;
-        this.size = options.size;
+        var i = 0,
+            j = 0,
+            loop;
 
-        for (var i = 0; i < this.size; i++) {
-          for (var j = 0; j < this.size; j++) {
-            this._createTile({
-              y: i,
-              x: j,
-              type: this._getRandomType(i, j)
-            });
+        this.size = options.size;
+        this.types = _.range(1, options.typeAmount + 1);
+
+        loop = setInterval(function () {
+          this._createTile({
+            y: i,
+            x: j,
+            type: this._getRandomType(i, j)
+          });
+
+          j++;
+          if (j === this.size) {
+            i++;
+            j = 0;
           }
-        }
+          if (i === this.size) {
+            clearInterval(loop);
+          }
+        }.bind(this), 10);
+
+        // for (var i = 0; i < this.size; i++) {
+        //   for (var j = 0; j < this.size; j++) {
+        //     setTimeout(function() {
+        //       this._createTile({
+        //         y: i,
+        //         x: j,
+        //         type: this._getRandomType(i, j)
+        //       });
+        //     }.bind(this), 1000);
+        //   }
+        // }
         return this;
       },
       createN: function (coords) {
@@ -45,24 +68,51 @@ define([
         var tile = new Tile(options);
         this.add(tile);
       },
-      _getRandomType: function (i, j) {
-        var type = _.random(1, this.typeAmount);
+      _getRandomType: function (i, j, except) {
+        var withoutParams,
+            types,
+            type;
 
-        if (arguments.length === 2) {
+        except = except || [];
+
+        withoutParams = except.slice(0);
+        withoutParams.unshift(this.types);
+        types = _.without.apply(null, withoutParams);
+
+        if (types.length) {
+          type = _.shuffle(types)[0];
+        } else {
+          this._resetTilesType(j - 1, i);
+          return this._getRandomType(i, j);
+        }
+
+        // don't create combos
+        if (arguments.length >= 2) {
+          this._getRandomType.calls = this._getRandomType.calls || [];
           this._tempPlayGround = this._tempPlayGround || {};
           this._tempPlayGround[i] = this._tempPlayGround[i] || {};
 
           // horizontal simple combo (3x)
           if (!_.isEmpty(this._tempPlayGround[i])) {
             if (this._tempPlayGround[i][j - 2] === type && this._tempPlayGround[i][j - 1] === type) {
-              return this._getRandomType(i, j);
+              if (except.length) {
+                except.push(type);
+              } else {
+                except = [type];
+              }
+              return this._getRandomType(i, j, except);
             }
           }
 
           // vertical simple combo
           if (this._tempPlayGround[i - 1] && this._tempPlayGround[i - 2]) {
             if (this._tempPlayGround[i - 1][j] === type && this._tempPlayGround[i - 2][j] === type) {
-              return this._getRandomType(i, j);
+              if (except.length) {
+                except.push(type);
+              } else {
+                except = [type];
+              }
+              return this._getRandomType(i, j, except);
             }
           }
 
@@ -80,6 +130,11 @@ define([
         }
 
         return type;
+      },
+      _resetTilesType: function (x, y) {
+        var tile = this.getTileByCoords(x, y);
+        if (!tile) debugger;
+        tile.set('type', this._getRandomType(y, x, [tile.get('type')]));
       },
       findNeighbour: function (tile, direction) {
         var neighbour,
