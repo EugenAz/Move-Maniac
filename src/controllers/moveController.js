@@ -109,11 +109,7 @@ define([
         }
       }
 
-      crossCombos = this._getCrossCombos(verticalCombos, horizontalCombos);
-
-      return verticalCombos
-              .concat(horizontalCombos)
-              .concat(crossCombos);
+      return this._getCrossCombos(horizontalCombos, verticalCombos);
     },
     _getLineComboStep: function (i, j, options) {
       var ij;
@@ -148,36 +144,46 @@ define([
         options.tempCombo.flush();
       }
     },
-    _getCrossCombos: function (verticalCombos, horizontalCombos, faa) {
+    _getCrossCombos: function (aCombos, bCombos) {
       // TODO: find all matching coords in combos
-      if (faa === 'faa') {
-        this._getCrossCombos.recurred = true;
-      }
-      var crossCombos = [];
-      horizontalCombos.forEach(function (hCombo, hIndex) {
-        for (var hCoord in hCombo.coords) {
+      var matches = false,
+          cCombos = [];
 
-          verticalCombos.forEach(function (vCombo, vIndex) {
-            var coords = Object.keys(vCombo.coords);
+      for(var i = 0, alength = aCombos.length; i < alength; ++i) {
+        for (var aCoord in aCombos[i].coords) {
 
-            if (~coords.indexOf(hCoord)) {
-              if (crossCombos.length && ~Object.keys(crossCombos[crossCombos.length - 1].coords).indexOf(hCoord)) {
-                crossCombos[crossCombos.length - 1] = Combo.mergeCombos(crossCombos[crossCombos.length - 1], verticalCombos[vIndex]);
-                verticalCombos.splice(vIndex, 1);
+          for(var j = 0, blength = bCombos.length; j < blength; ++j) {
+            var coords;
+
+            if (aCombos[i] === bCombos[j]) {
+              aCombos.splice(i--, 1);
+              break;
+            }
+
+            coords = Object.keys(bCombos[j].coords);
+
+            if (~coords.indexOf(aCoord)) {
+              matches = true;
+
+              if (cCombos.length && ~Object.keys(cCombos[cCombos.length - 1].coords).indexOf(aCoord)) {
+                cCombos[cCombos.length - 1] = Combo.mergeCombos(cCombos[cCombos.length - 1], bCombos[j]);
+                bCombos.splice(j--, 1);
               } else {
-                crossCombos.push(Combo.mergeCombos(hCombo, vCombo));
-                horizontalCombos.splice(hIndex, 1);
-                verticalCombos.splice(vIndex, 1);
+                cCombos.push(Combo.mergeCombos(aCombos[i], bCombos[j]));
+                aCombos.splice(i, 1);
+                bCombos.splice(j--, 1);
               }
             }
-          });
+          }
         }
-      });
+      }
 
-      if (this._getCrossCombos.recurred) {
-        return crossCombos;
+      if (matches) {
+        aCombos = cCombos.concat(aCombos).concat(bCombos);
+        bCombos = aCombos.slice(0);
+        return this._getCrossCombos(aCombos, bCombos);
       } else {
-        return crossCombos.concat(this._getCrossCombos(crossCombos, horizontalCombos, 'faa'));
+        return bCombos.concat(cCombos);
       }
     },
     checkMoveCombo: function () {}
