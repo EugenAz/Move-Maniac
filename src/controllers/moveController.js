@@ -54,12 +54,30 @@ define([
         tile.move(direction);
 
         if (combos = this.wholeFieldComboCheck()) { // TODO: checkMoveCombo
-          do {
-            // TODO: Add delay for animation
+
+          console.log('before first tick');
+          var intervalID = setInterval(function () {
+            console.log('tick');
             removedTiles = this.tiles.removeSelected(combos);
             this.tiles.createSubstitutions(removedTiles);
-            this.tiles.dropTilesIntoPositions(removedTiles);
-          } while (combos = this.wholeFieldComboCheck());
+
+            setTimeout(function () {
+              console.log('tick and drop');
+              this.tiles.dropTilesIntoPositions(removedTiles);
+
+              if (! (combos = this.wholeFieldComboCheck()) ) {
+                clearInterval(intervalID);
+              }
+            }.bind(this), 500);
+
+          }.bind(this), 700);
+
+          // do {
+          //   // TODO: Add delay for animation
+          //   removedTiles = this.tiles.removeSelected(combos);
+          //   this.tiles.createSubstitutions(removedTiles);
+          //   this.tiles.dropTilesIntoPositions(removedTiles);
+          // } while (combos = this.wholeFieldComboCheck());
         } else {
           setTimeout(function () {
             neighbour.move(direction);
@@ -87,8 +105,7 @@ define([
       return combos.length > 0 ? combos : false;
     },
     _getCombos: function () {
-      var crossCombos = [],
-          horizontalCombos = [],
+      var horizontalCombos = [],
           verticalCombos = [],
           horizontalTempCombo = new Combo(),
           verticalTempCombo = new Combo(),
@@ -131,6 +148,7 @@ define([
       if (options.tempCombo.isEmpty()) {
         options.tempCombo.push(i, j, this._tempTiles[i][j]);
       } else {
+        if (!options.tempCombo.lastTile() || !this._tempTiles[i][j]) debugger;
         if (options.tempCombo.lastTile().type === this._tempTiles[i][j].type) {
           options.tempCombo.push(i, j, this._tempTiles[i][j]);
         } else {
@@ -185,7 +203,7 @@ define([
         bCombos = aCombos.slice(0);
         return this._getCrossCombos(aCombos, bCombos);
       } else {
-        return aCombos;
+        return aCombos.concat(bCombos);
       }
     },
     checkMoveCombo: function () {}

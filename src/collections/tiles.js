@@ -163,6 +163,7 @@ define([
             emptyCoords.push(key);
             tile = this.get(combo.coords[key]);
             this.remove(tile);
+            if (!tile) debugger;
             tile.destroy();
           }
         }.bind(this));
