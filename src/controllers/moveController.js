@@ -164,41 +164,43 @@ define([
     },
     _getCrossCombos: function (aCombos, bCombos) {
       // TODO: find all matching coords in combos
-      var matches = false,
-          cCombos = [];
+      var cCombos = [],
+          coords = [];
 
       for(var i = 0, alength = aCombos.length; i < alength; ++i) {
         if (aCombos[i]) {
           for (var aCoord in aCombos[i].coords) {
+            if (bCombos.length) {
+              for(var j = 0, blength = bCombos.length; j < blength; ++j) {
 
-            for(var j = 0, blength = bCombos.length; j < blength; ++j) {
-              var coords;
-
-              if (aCombos[i] && aCombos[i] === bCombos[j]) {
-                bCombos.splice(j--, 1);
-                break;
-              }
-
-              coords = bCombos[j] ? Object.keys(bCombos[j].coords) : [];
-
-              if (~coords.indexOf(aCoord)) {
-                matches = true;
-
-                if (cCombos.length && ~Object.keys(cCombos[cCombos.length - 1].coords).indexOf(aCoord)) {
-                  cCombos[cCombos.length - 1] = Combo.mergeCombos(cCombos[cCombos.length - 1], bCombos[j]);
+                if (aCombos[i] && aCombos[i] === bCombos[j]) {
                   bCombos.splice(j--, 1);
-                } else {
-                  cCombos.push(Combo.mergeCombos(aCombos[i], bCombos[j]));
-                  aCombos.splice(i--, 1);
-                  bCombos.splice(j--, 1);
+                  break;
+                }
+
+                coords = bCombos[j] ? Object.keys(bCombos[j].coords) : [];
+
+                if (~coords.indexOf(aCoord)) {
+                  if (cCombos.length && ~Object.keys(cCombos[cCombos.length - 1].coords).indexOf(aCoord)) {
+                    cCombos[cCombos.length - 1] = Combo.mergeCombos(cCombos[cCombos.length - 1], bCombos[j]);
+                    bCombos.splice(j--, 1);
+                  } else {
+                    cCombos.push(Combo.mergeCombos(aCombos[i], bCombos[j]));
+                    aCombos.splice(i--, 1);
+                    bCombos.splice(j--, 1);
+                  }
                 }
               }
+            } else {
+              break;
             }
           }
+        } else {
+          continue;
         }
       }
 
-      if (matches) {
+      if (cCombos.length) {
         aCombos = cCombos.concat(aCombos).concat(bCombos);
         bCombos = aCombos.slice(0);
         return this._getCrossCombos(aCombos, bCombos);
