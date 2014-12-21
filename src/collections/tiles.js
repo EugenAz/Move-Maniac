@@ -75,12 +75,12 @@ define([
 
         except = except || [];
 
-        withoutParams = except.slice(0);
+        withoutParams = _(except).clone();
         withoutParams.unshift(this.types);
         types = _.without.apply(null, withoutParams);
 
         if (types.length) {
-          type = _.shuffle(types)[0];
+          type = _.sample(types);
         } else {
           this._resetTilesType(j - 1, i);
           return this._getRandomType(i, j);

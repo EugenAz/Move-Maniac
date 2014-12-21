@@ -131,11 +131,6 @@ define([
     _getLineComboStep: function (i, j, options) {
       var ij;
 
-      function _tryToCollectAndFlush () {
-        if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.export());
-        options.tempCombo.flush();
-      }
-
       if (i !== 0 && j === 0) {
         if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.export());
         options.tempCombo.flush();
@@ -148,7 +143,6 @@ define([
       if (options.tempCombo.isEmpty()) {
         options.tempCombo.push(i, j, this._tempTiles[i][j]);
       } else {
-        if (!options.tempCombo.lastTile() || !this._tempTiles[i][j]) debugger;
         if (options.tempCombo.lastTile().type === this._tempTiles[i][j].type) {
           options.tempCombo.push(i, j, this._tempTiles[i][j]);
         } else {
@@ -163,49 +157,52 @@ define([
       }
     },
     _getCrossCombos: function (aCombos, bCombos) {
-      // TODO: find all matching coords in combos
       var cCombos = [],
-          coords = [];
+          dAI = 0,
+          dBI = 0;
 
-      for(var i = 0, alength = aCombos.length; i < alength; ++i) {
-        if (aCombos[i]) {
-          for (var aCoord in aCombos[i].coords) {
-            if (bCombos.length) {
-              for(var j = 0, blength = bCombos.length; j < blength; ++j) {
+      _(aCombos).forEach(function (aCombo, aIndex) {
+        if (dAI > 0) {
+          aCombo = aCombos[aIndex - dAI];
+        }
 
-                if (aCombos[i] && aCombos[i] === bCombos[j]) {
-                  bCombos.splice(j--, 1);
-                  break;
-                }
+        dBI = 0;
 
-                coords = bCombos[j] ? Object.keys(bCombos[j].coords) : [];
+        _(bCombos).forEach(function (bCombo, bIndex) {
+          if (dBI > 0) {
+            bCombo = bCombos[bIndex - dBI];
+          }
 
-                if (~coords.indexOf(aCoord)) {
-                  if (cCombos.length && ~Object.keys(cCombos[cCombos.length - 1].coords).indexOf(aCoord)) {
-                    cCombos[cCombos.length - 1] = Combo.mergeCombos(cCombos[cCombos.length - 1], bCombos[j]);
-                    bCombos.splice(j--, 1);
-                  } else {
-                    cCombos.push(Combo.mergeCombos(aCombos[i], bCombos[j]));
-                    aCombos.splice(i--, 1);
-                    bCombos.splice(j--, 1);
-                  }
+          if (aCombo === bCombo) {
+            bCombos.splice(bIndex - dBI, 1);
+            dBI++;
+          } else {
+            if (_.intersection(_.toArray(aCombo.coords), _.toArray(bCombo.coords)).length) {
+              if (cCombos.length && _.intersection(_.toArray(_.last(cCombos).coords), _.toArray(bCombo.coords)).length) {
+                cCombos[cCombos.length - 1] = Combo.mergeCombos(cCombos[cCombos.length - 1], bCombo);
+              } else {
+                cCombos.push(Combo.mergeCombos(aCombo, bCombo));
+                aCombos.splice(aIndex - dAI, 1);
+                dAI++;
+
+                if (~aCombos.indexOf(bCombo)) {
+                  aCombos.splice(aCombos.indexOf(bCombo), 1);
                 }
               }
-            } else {
-              break;
+
+              bCombos.splice(bIndex - dBI, 1);
+              dBI++;
             }
           }
-        } else {
-          continue;
-        }
-      }
+        });
+      });
 
       if (cCombos.length) {
         aCombos = cCombos.concat(aCombos).concat(bCombos);
-        bCombos = aCombos.slice(0);
+        bCombos = _(aCombos).clone();
         return this._getCrossCombos(aCombos, bCombos);
       } else {
-        return aCombos.concat(bCombos);
+        return _.union(aCombos, bCombos);
       }
     },
     checkMoveCombo: function () {}

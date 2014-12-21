@@ -56,20 +56,17 @@ define(function () {
   };
 
   Combo.mergeCombos = function (combo1, combo2) {
-    var crossCombo = {
-      count: combo1.count + combo2.count - 1,
-      type: combo1.type,
-      coords: combo1.coords,
-      keyElem: '' // id
-    };
+    var union = _.union(Object.keys(combo1.coords), Object.keys(combo2.coords)),
+        crossCombo = {
+          count: union.length,
+          type: combo1.type,
+          coords: {},
+          keyElem: '' // id TODO:
+        };
 
-    for (var key in combo2.coords) {
-      if (!(key in crossCombo.coords)) {
-        crossCombo.coords[key] = combo2.coords[key];
-      } else {
-        crossCombo.keyElem = crossCombo.coords[key];
-      }
-    }
+    _(union).forEach(function (coordKey) {
+      crossCombo.coords[coordKey] = combo1.coords[coordKey] || combo2.coords[coordKey];
+    });
 
     return crossCombo;
   };
