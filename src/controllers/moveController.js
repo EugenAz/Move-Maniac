@@ -55,14 +55,11 @@ define([
 
         if (combos = this.wholeFieldComboCheck()) { // TODO: checkMoveCombo
 
-          console.log('before first tick');
           var intervalID = setInterval(function () {
-            console.log('tick');
             removedTiles = this.tiles.removeSelected(combos);
             this.tiles.createSubstitutions(removedTiles);
 
             setTimeout(function () {
-              console.log('tick and drop');
               this.tiles.dropTilesIntoPositions(removedTiles);
 
               if (! (combos = this.wholeFieldComboCheck()) ) {
