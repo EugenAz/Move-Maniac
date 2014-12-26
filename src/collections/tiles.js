@@ -132,7 +132,6 @@ define([
       },
       _resetTilesType: function (x, y) {
         var tile = this.getTileByCoords(x, y);
-        if (!tile) debugger;
         tile.set('type', this._getRandomType(y, x, [tile.get('type')]));
       },
       findNeighbour: function (tile, direction) {
