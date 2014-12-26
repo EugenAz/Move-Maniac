@@ -1,6 +1,7 @@
 require.config({
   baseUrl: 'src',
   paths: {
+    q: '../libs/q',
     jss: '../libs/jss.min',
     jquery: '../libs/jquery-2.1.1.min',
     underscore: '../libs/lodash.compat.min',

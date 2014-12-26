@@ -5,20 +5,20 @@ define([
   GameView,
   GameRoundController
 ) {
-    'use strict';
+  'use strict';
 
-    function GameController () {};
+  function GameController () {};
 
-    GameController.prototype.startGame = function () {
-      var gameRound = new GameRoundController({
-        size: 5,
-        typeAmount: 3
-      });
+  GameController.prototype.startGame = function () {
+    var gameRound = new GameRoundController({
+      size: 6,
+      typeAmount: 4
+    });
 
-      var gameView = new GameView();
+    var gameView = new GameView();
 
-      gameRound.startRound(gameView.render().$el);
-    };
+    gameRound.startRound(gameView.render().$el);
+  };
 
-    return GameController;
+  return GameController;
 });

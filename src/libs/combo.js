@@ -1,8 +1,6 @@
 define(function () {
   'use strict';
 
-
-
   function Combo () {
     var comboTiles = {},
         lastTileInCombo = {};

@@ -20,9 +20,9 @@ define([
     initY: 0,
     initialize: function () {
       this.touchable = 'ontouchstart' in window;
-      this.model.on('change:x change:y', this.render.bind(this));
-      this.model.on('change:type', this._changeType.bind(this));
-      this.model.on('destroy', this._onDestroy.bind(this));
+      this.model.on('change:x change:y', this.render, this);
+      this.model.on('change:type', this._changeType, this);
+      this.model.on('destroy', this._destroy, this);
     },
     _coordToSize: function (coord) {
       return coord * (constants.theme.tileSizePx + constants.theme.tileMarginPx);
@@ -46,11 +46,10 @@ define([
       return this;
     },
     _changeType: function (model) {
-      this.$el.removeClass();
-      this.$el.addClass('tile');
+      this.$el.removeClass('tile-type-' + model.previousAttributes().type);
       this.$el.addClass('tile-type-' + model.get('type'));
     },
-    _onDestroy: function (e) {
+    _destroy: function () {
       this.remove();
     },
     _onDragInit: function (e) {
@@ -60,8 +59,8 @@ define([
       this.undelegateEvents();
       setTimeout(this.delegateEvents.bind(this), constants.theme.animationDuration * 1000);
 
-      this.initX = e.clientX ? e.clientX : e.originalEvent.touches[0].pageX;
-      this.initY = e.clientY ? e.clientY : e.originalEvent.touches[0].pageY;
+      this.initX = this._getMousePosition(e, 'X');
+      this.initY = this._getMousePosition(e, 'Y');
 
       moveEvent = this.touchable ? 'touchmove' : 'mousemove';
 
@@ -73,8 +72,8 @@ define([
             }));
     },
     _onDrag: function (e) {
-      var x = e.clientX ? e.clientX : e.originalEvent.touches[0].pageX,
-          y = e.clientY ? e.clientY : e.originalEvent.touches[0].pageY;
+      var x = this._getMousePosition(e, 'X'),
+          y = this._getMousePosition(e, 'Y');
 
       if (x !== this.initX || y !== this.initY) {
         this._stopDragging();
@@ -89,6 +88,10 @@ define([
           }
         });
       }
+    },
+    _getMousePosition: function (e, coord) {
+      coord = coord.toUpperCase();
+      return e['client' + coord] ? e['client' + coord] : e.originalEvent.touches[0]['page' + coord];
     },
     _stopDragging: function () {
       this.$el.off(this.touchable ? 'touchmove' : 'mousemove');

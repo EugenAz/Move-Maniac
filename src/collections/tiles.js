@@ -24,8 +24,7 @@ define([
             type: this._getRandomType(i, j)
           });
 
-          j++;
-          if (j === this.size) {
+          if (++j === this.size) {
             i++;
             j = 0;
           }
@@ -225,6 +224,21 @@ define([
         return this.find(function (tile) {
           return tile.get('x') === x && tile.get('y') === y;
         });
+      },
+      format: function (format) {
+        var tempTiles = {};
+
+        if (format === 'rows') {
+          this.models.forEach(function (tile) {
+            tempTiles[tile.get('y')] = tempTiles[tile.get('y')] || {};
+            tempTiles[tile.get('y')][tile.get('x')] = {
+              id: tile.cid,
+              type: tile.get('type')
+            };
+          });
+        }
+
+        return tempTiles;
       }
     });
 });

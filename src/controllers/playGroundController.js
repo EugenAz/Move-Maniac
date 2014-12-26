@@ -20,27 +20,22 @@ define([
       this.movement = new MoveController(this);
     }
 
-    PlayGroundController.prototype = {
-      init: function () {
-        var options = {
-            size: this.size,
-            typeAmount: this.typeAmount
-          };
+    PlayGroundController.prototype.init =  function () {
+      var options = {
+          size: this.size,
+          typeAmount: this.typeAmount
+        };
 
-        this.tiles = new Tiles(),
-        this.tiles.create(options);
+      this.tiles = new Tiles();
+      this.tiles.create(options);
 
-        this.playGroundView = new PlayGroundView(options);
+      this.playGroundView = new PlayGroundView(options);
 
-        this.playGroundView.on('move', this.movement.handler.bind(this.movement));
+      this.playGroundView.on('move', this.movement.init, this.movement);
 
-        this.tiles.on('add', this.playGroundView.addTile.bind(this.playGroundView));
+      this.tiles.on('add', this.playGroundView.addTile, this.playGroundView);
 
-        this.rootEl.append(this.playGroundView.render(this.tiles).el);
-      },
-      _onTileAdd: function (tile, tiles, options) {
-        this.playGroundView.addTile(tile);
-      }
+      this.rootEl.append(this.playGroundView.render(this.tiles).el);
     };
 
     return PlayGroundController;

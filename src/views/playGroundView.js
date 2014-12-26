@@ -1,11 +1,11 @@
 define([
-  'jss',
   'backbone',
+  'jss',
   'views/tileView',
   'constants'
 ], function(
-  jss,
   Backbone,
+  jss,
   TileView,
   constants
 ) {
@@ -19,16 +19,11 @@ define([
     },
     render: function (tiles) {
       this._setPlayGroundSize();
+      this._setTransitionDuration();
 
       _(tiles.models).each(function (tile) {
         this.addTile(tile);
       }.bind(this));
-
-      jss.createStyleSheet({
-        '.tile': {
-          'transition-duration': constants.theme.animationDuration + 's'
-        }
-      }).attach();
 
       return this;
     },
@@ -41,18 +36,21 @@ define([
 
       tileView.on('move', function (options) {
         this.trigger('move', options);
-      }.bind(this));
+      }, this);
 
       this.$el.append(tileView.render().el);
     },
+    _setTransitionDuration: function () {
+      jss.createStyleSheet({
+        '.tile': {
+          'transition-duration': constants.theme.animationDuration + 's'
+        }
+      }).attach();
+    },
     _setPlayGroundSize: function () {
-      if (! this.sizeIsSet) {
-        _(['width', 'height']).each(function (prop) {
-          this.$el.css(prop, (this.size * constants.theme.tileSizePx) + ((this.size - 1) * constants.theme.tileMarginPx));
-        }.bind(this));
-
-        this.sizeIsSet = true;
-      }
+      _(['width', 'height']).each(function (prop) {
+        this.$el.css(prop, (this.size * constants.theme.tileSizePx) + ((this.size - 1) * constants.theme.tileMarginPx));
+      }.bind(this));
     }
   });
 });
