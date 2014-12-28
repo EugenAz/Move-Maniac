@@ -18,52 +18,47 @@ define([
         verticalTempCombo = new Combo(),
         i, j;
 
-    // TODO: refactor
     for (i = 0; i < playGroundSize; i++) {
       for (j = 0; j < playGroundSize; j++) {
-        _getLineComboStep(i, j, {
-          combos: horizontalCombos,
-          tempCombo: horizontalTempCombo,
-        });
-
-        _getLineComboStep(i, j, {
-          combos: verticalCombos,
-          tempCombo: verticalTempCombo,
-          reverse: true
-        });
+        _getLineComboStep(i, j, horizontalCombos, horizontalTempCombo);
+        _getLineComboStep(i, j, verticalCombos, verticalTempCombo, true);
       }
     }
 
     return _getCrossCombos(horizontalCombos, verticalCombos);
   };
 
-  function _getLineComboStep (i, j, options) {
+  function _getLineComboStep (i, j, combos, tempCombo, reverse) {
     var ij;
 
     if (i !== 0 && j === 0) {
-      if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.export());
-      options.tempCombo.flush();
+      if (tempCombo.length >= 3) combos.push(tempCombo.export());
+      tempCombo.flush();
     }
 
-    if (options.reverse && i !== j) {
+    if (reverse && i !== j) {
       ij = i; i = j; j = ij;
     }
 
-    if (options.tempCombo.isEmpty()) {
-      options.tempCombo.push(i, j, tiles[i][j]);
-    } else {
-      if (options.tempCombo.lastTile().type === tiles[i][j].type) {
-        options.tempCombo.push(i, j, tiles[i][j]);
-      } else {
-        if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.export());
-        options.tempCombo.flush(i, j, tiles[i][j]);
-      }
+    if ( doPushToTempCombo(tempCombo, i, j) ) {
+      tempCombo.push(i, j, tiles[i][j]);
     }
 
-    if (i === playGroundSize - 1 && j === playGroundSize - 1) {
-      if (options.tempCombo.length >= 3) options.combos.push(options.tempCombo.export());
-      options.tempCombo.flush();
+    if ( doPushToCombos(tempCombo, i, j) ) {
+      if (tempCombo.length >= 3) combos.push(tempCombo.export());
+      tempCombo.flush(i, j, tiles[i][j]);
     }
+  }
+
+  function doPushToTempCombo (tempCombo, i, j) {
+    return tempCombo.isEmpty() || tempCombo.lastTile().type === tiles[i][j].type;
+  }
+
+  function doPushToCombos(tempCombo, i, j) {
+    return i === playGroundSize - 1 &&
+           j === playGroundSize - 1 ||
+           !tempCombo.isEmpty() &&
+           tempCombo.lastTile().type !== tiles[i][j].type;
   }
 
   function _getCrossCombos (aCombos, bCombos) {
