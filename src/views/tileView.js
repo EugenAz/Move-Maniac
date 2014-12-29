@@ -1,8 +1,10 @@
 define([
   'backbone',
+  'libs/timeManager',
   'constants'
 ], function (
   Backbone,
+  TimeManager,
   constants
 ) {
   'use strict';
@@ -53,23 +55,28 @@ define([
       this.remove();
     },
     _onDragInit: function (e) {
-      var dragHandler = _.bind(this._onDrag, this),
+      var dragHandler,
           moveEvent;
 
-      this.undelegateEvents();
-      setTimeout(this.delegateEvents.bind(this), constants.theme.animationDuration * 1000);
+      if (TimeManager.getState() === constants.state.IDLE) {
+        // TimeManager.setState(constants.state.INPROCESS);
+        dragHandler = _.bind(this._onDrag, this);
 
-      this.initX = this._getMousePosition(e, 'X');
-      this.initY = this._getMousePosition(e, 'Y');
+        this.undelegateEvents();
+        setTimeout(this.delegateEvents.bind(this), constants.theme.animationDuration * 1000);
 
-      moveEvent = this.touchable ? 'touchmove' : 'mousemove';
+        this.initX = this._getMousePosition(e, 'X');
+        this.initY = this._getMousePosition(e, 'Y');
 
-      this.$el
-            .attr('draggable', 'false')
-            .on(moveEvent, _.debounce(dragHandler, 100, {
-              leading: false,
-              trailing: true
-            }));
+        moveEvent = this.touchable ? 'touchmove' : 'mousemove';
+
+        this.$el
+              .attr('draggable', 'false')
+              .on(moveEvent, _.debounce(dragHandler, 100, {
+                leading: false,
+                trailing: true
+              }));
+      }
     },
     _onDrag: function (e) {
       var x = this._getMousePosition(e, 'X'),

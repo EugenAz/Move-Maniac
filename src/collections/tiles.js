@@ -1,21 +1,39 @@
 define([
   'backbone',
-  'models/tile'
+  'models/tile',
+  'constants'
 ], function (
   Backbone,
-  Tile
+  Tile,
+  constants
 ) {
     'use strict';
 
     return Backbone.Collection.extend({
       model: Tile,
       create: function (options) {
+        this.size = options.size;
+        this.types = _.range(1, options.typeAmount + 1);
+
+        this._createWithAnimation();
+
+        return this;
+      },
+      _createWithoutAnimation: function () {
+        for (var i = 0; i < this.size; i++) {
+          for (var j = 0; j < this.size; j++) {
+            this._createTile({
+              y: i,
+              x: j,
+              type: this._getRandomType(i, j)
+            });
+          }
+        }
+      },
+      _createWithAnimation: function () {
         var i = 0,
             j = 0,
             loop;
-
-        this.size = options.size;
-        this.types = _.range(1, options.typeAmount + 1);
 
         loop = setInterval(function () {
           this._createTile({
@@ -32,19 +50,6 @@ define([
             clearInterval(loop);
           }
         }.bind(this), 10);
-
-        // for (var i = 0; i < this.size; i++) {
-        //   for (var j = 0; j < this.size; j++) {
-        //     setTimeout(function() {
-        //       this._createTile({
-        //         y: i,
-        //         x: j,
-        //         type: this._getRandomType(i, j)
-        //       });
-        //     }.bind(this), 1000);
-        //   }
-        // }
-        return this;
       },
       createN: function (coords) {
         var split,
@@ -136,18 +141,17 @@ define([
       },
       findNeighbour: function (tile, direction) {
         var neighbour,
-            dx = {
-              'up': tile.get('x'),
-              'right': tile.get('x') + 1,
-              'down': tile.get('x'),
-              'left': tile.get('x') - 1
-            },
-            dy = {
-              'up': tile.get('y') - 1,
-              'right': tile.get('y'),
-              'down': tile.get('y') + 1,
-              'left': tile.get('y')
-            };
+            dx = {}, dy = {};
+
+        dx[constants.movement.UP] = tile.get('x');
+        dx[constants.movement.RIGHT] = tile.get('x') + 1;
+        dx[constants.movement.DOWN] = tile.get('x');
+        dx[constants.movement.LEFT] = tile.get('x') - 1;
+
+        dy[constants.movement.UP] = tile.get('y') - 1;
+        dy[constants.movement.RIGHT] = tile.get('y');
+        dy[constants.movement.DOWN] = tile.get('y') + 1;
+        dy[constants.movement.LEFT] = tile.get('y');
 
         neighbour = this.getTileByCoords(dx[direction], dy[direction]);
         return neighbour;

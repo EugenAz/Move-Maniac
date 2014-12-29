@@ -1,18 +1,15 @@
 define([
+  'q',
   'constants',
-  'libs/combos'
+  'libs/combos',
+  'libs/timeManager'
 ], function (
+  q,
   constants,
-  Combos
+  Combos,
+  TimeManager
 ) {
   'use strict';
-
-  var oppositeDirection = {
-    'up': 'down',
-    'right': 'left',
-    'down': 'up',
-    'left': 'right'
-  };
 
   function MoveController (playGround) {
     this.playGround = playGround;
@@ -22,15 +19,15 @@ define([
     getDragDirection: function (deltaX, deltaY) {
       if ( deltaX === 0 || (deltaY !== 0 && Math.abs(deltaX) < Math.abs(deltaY)) ) {
         if ( deltaY > 0 ) {
-          return 'up';
+          return constants.movement.UP;
         } else {
-          return 'down';
+          return constants.movement.DOWN;
         }
       } else {
         if ( deltaX < 0 ) {
-          return 'right';
+          return constants.movement.RIGHT;
         } else {
-          return 'left';
+          return constants.movement.LEFT;
         }
       }
     },
@@ -38,7 +35,7 @@ define([
       var tile,
           direction,
           neighbour,
-          removedTiles,
+          // removedTiles,
           combos;
 
       this.tiles = this.playGround.tiles;
@@ -50,30 +47,39 @@ define([
 
       if (tile.canMove(direction, this.playGround.size)) {
         neighbour = this.tiles.findNeighbour(tile, direction);
-        neighbour.move(oppositeDirection[direction]);
+        neighbour.move(constants.movement.opposite[direction]);
         tile.move(direction);
 
         if (combos = this.wholeFieldComboSearch()) { // TODO: checkMoveCombo
+          TimeManager.setState(constants.state.INPROCESS);
+
           var intervalID = setInterval(function () {
-            removedTiles = this.tiles.removeSelected(combos);
-            this.tiles.createSubstitutions(removedTiles);
+            var _this = this;
+            TimeManager.timeOut(function () {
+              var removedTiles = _this.tiles.removeSelected(combos);
+              _this.tiles.createSubstitutions(removedTiles);
+              return removedTiles;
+            }, constants.theme.animationDuration * 2000)
+            .then(function (removedTiles) {
+              TimeManager.timeOut(function () {
+                _this.tiles.dropTilesIntoPositions(removedTiles);
 
-            // TODO: add global animation and timing control
-
-            setTimeout(function () {
-              this.tiles.dropTilesIntoPositions(removedTiles);
-
-              if (! (combos = this.wholeFieldComboSearch()) ) {
-                clearInterval(intervalID);
-              }
-            }.bind(this), 500);
-
-          }.bind(this), 700);
+                if (! (combos = _this.wholeFieldComboSearch()) ) {
+                  clearInterval(intervalID);
+                }
+              }, constants.theme.animationDuration * 1000)
+              .then(function () {
+                TimeManager.setState(constants.state.IDLE);
+              });
+            });
+          }.bind(this), constants.theme.animationDuration * 3000)
         } else {
-          setTimeout(function () {
+          TimeManager.timeOut(function () {
             neighbour.move(direction);
-            tile.move(oppositeDirection[direction]);
-          }, constants.theme.animationDuration * 1000);
+            tile.move(constants.movement.opposite[direction]);
+          }, constants.theme.animationDuration * 1000).then(function () {
+            TimeManager.setState(constants.state.IDLE);
+          });
         }
       }
     },
