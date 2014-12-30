@@ -34,9 +34,7 @@ define([
     init: function (options) {
       var tile,
           direction,
-          neighbour,
-          // removedTiles,
-          combos;
+          neighbour;
 
       this.tiles = this.playGround.tiles;
 
@@ -47,51 +45,77 @@ define([
 
       if (tile.canMove(direction, this.playGround.size)) {
         neighbour = this.tiles.findNeighbour(tile, direction);
-        neighbour.move(constants.movement.opposite[direction]);
-        tile.move(direction);
+        this._gameMove(tile, neighbour, direction);
 
-        if (combos = this.wholeFieldComboSearch()) { // TODO: checkMoveCombo
-          TimeManager.setState(constants.state.INPROCESS);
-
-          var intervalID = setInterval(function () {
-            var _this = this;
-            TimeManager.timeOut(function () {
-              var removedTiles = _this.tiles.removeSelected(combos);
-              _this.tiles.createSubstitutions(removedTiles);
-              return removedTiles;
-            }, constants.theme.animationDuration * 2000)
-            .then(function (removedTiles) {
-              TimeManager.timeOut(function () {
-                _this.tiles.dropTilesIntoPositions(removedTiles);
-
-                if (! (combos = _this.wholeFieldComboSearch()) ) {
-                  clearInterval(intervalID);
-                }
-              }, constants.theme.animationDuration * 1000)
-              .then(function () {
-                TimeManager.setState(constants.state.IDLE);
-              });
-            });
-          }.bind(this), constants.theme.animationDuration * 3000)
-        } else {
+        this._comboIterations()
+        .then(null, function () {
           TimeManager.timeOut(function () {
-            neighbour.move(direction);
-            tile.move(constants.movement.opposite[direction]);
-          }, constants.theme.animationDuration * 1000).then(function () {
+            this._gameMove(neighbour, tile, direction);
+          }.bind(this), constants.theme.animationDuration * 1000)
+          .then(function () {
             TimeManager.setState(constants.state.IDLE);
           });
-        }
+        }.bind(this));
       }
     },
+    _comboIterations: function (iteration) {
+      var _this = this,
+          defer = q.defer();
+
+      TimeManager.setState(constants.state.INPROCESS);
+      iteration = iteration || 0;
+
+      this.wholeFieldComboSearch() // TODO: checkMoveCombo
+
+      .then(function (combos) {
+          return TimeManager.timeOut(function () {
+            var removedTiles = _this.tiles.removeSelected(combos);
+            _this.tiles.createSubstitutions(removedTiles);
+
+            return removedTiles;
+          }, constants.theme.animationDuration * 2000);
+        },
+        function () {
+          TimeManager.setState(constants.state.IDLE);
+          defer.reject(iteration);
+      })
+
+      .then(function (removedTiles) {
+        return TimeManager.timeOut(function () {
+          _this.tiles.dropTilesIntoPositions(removedTiles);
+        }, constants.theme.animationDuration * 1000);
+      })
+
+      .then(function () {
+        return _this._comboIterations(++iteration);
+      })
+
+      .done();
+
+      return defer.promise;
+    },
+    _gameMove: function (tile, neighbour, direction) {
+      tile.move(direction);
+      neighbour.move(constants.movement.opposite[direction]);
+    },
     wholeFieldComboSearch: function () {
-      var combos = [];
+      var combos = [],
+          defer;
+
+      defer = q.defer();
 
       combos = Combos.get({
         tiles: this.tiles.format('rows'),
         playGroundSize: this.playGround.size
       });
 
-      return combos.length > 0 ? combos : false;
+      if (combos.length > 0) {
+        defer.resolve(combos);
+      } else {
+        defer.reject();
+      }
+
+      return defer.promise;
     },
     checkMoveCombo: function () {}
   };
