@@ -36,21 +36,6 @@ define([
         }, timeout);
 
         return defer.promise;
-      },
-      setInterval: function (callback, timeout) {
-        var intervalID,
-            defer = q.defer();
-
-        intervalID = setInterval(function () {
-          var res = callback();
-          defer.resolve(res);
-          defer = q.defer();
-        }, timeout);
-
-        return {
-          promise: defer.promise,
-          id: intervalID
-        };
       }
     };
   })();

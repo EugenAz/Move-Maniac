@@ -59,7 +59,6 @@ define([
           moveEvent;
 
       if (TimeManager.getState() === constants.state.IDLE) {
-        // TimeManager.setState(constants.state.INPROCESS);
         dragHandler = _.bind(this._onDrag, this);
 
         this.undelegateEvents();
