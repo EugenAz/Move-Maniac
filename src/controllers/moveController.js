@@ -109,7 +109,7 @@ define([
         playGroundSize: this.playGround.size
       });
 
-      if (combos.length > 0) {
+      if (combos.length) {
         defer.resolve(combos);
       } else {
         defer.reject();
