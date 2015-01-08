@@ -47,7 +47,7 @@ define([
         neighbour = this.tiles.findNeighbour(tile, direction);
         this._gameMove(tile, neighbour, direction);
 
-        this._comboIterations()
+        this._iterateCombos()
         .then(null, function () {
           TimeManager.timeOut(function () {
             this._gameMove(neighbour, tile, direction);
@@ -58,7 +58,7 @@ define([
         }.bind(this));
       }
     },
-    _comboIterations: function (iteration) {
+    _iterateCombos: function (iteration) {
       var _this = this,
           defer = q.defer();
 
@@ -68,29 +68,28 @@ define([
       this.wholeFieldComboSearch() // TODO: checkMoveCombo
 
       .then(function (combos) {
-          return TimeManager.timeOut(function () {
-            var removedTiles = _this.tiles.removeSelected(combos);
-            _this.tiles.createSubstitutions(removedTiles);
+        return TimeManager.timeOut(function () {
+          var removedTiles = _this.tiles.removeSelected(combos);
+          _this.tiles.createSubstitutions(removedTiles);
 
-            return removedTiles;
-          }, constants.theme.animationDuration * 2000);
-        },
-        function () {
-          TimeManager.setState(constants.state.IDLE);
-          defer.reject(iteration);
+          return removedTiles;
+        }, constants.theme.animationDuration * 2000);
       })
 
       .then(function (removedTiles) {
-        return TimeManager.timeOut(function () {
-          _this.tiles.dropTilesIntoPositions(removedTiles);
-        }, constants.theme.animationDuration * 1000);
+        if (removedTiles && removedTiles.length) {
+          return TimeManager.timeOut(function () {
+            _this.tiles.dropTilesIntoPositions(removedTiles);
+          }, constants.theme.animationDuration * 1000);
+        }
       })
 
       .then(function () {
-        return _this._comboIterations(++iteration);
-      })
-
-      .done();
+        return _this._iterateCombos(++iteration);
+      }, function () {
+        TimeManager.setState(constants.state.IDLE);
+        defer.reject(iteration);
+      });
 
       return defer.promise;
     },
